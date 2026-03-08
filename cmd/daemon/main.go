@@ -10,6 +10,7 @@ var rootCmd = &cobra.Command{}
 
 func init() {
 	cmd.AddManPagesCmd(rootCmd)
+	cmd.AddVersionCmd(rootCmd)
 }
 
 func main() {
