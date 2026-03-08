@@ -37,8 +37,12 @@ func AddManPagesCmd(c *cobra.Command) {
 
 func AddVersionCmd(c *cobra.Command) {
 	c.AddCommand(&cobra.Command{
-		Use:   "version",
-		Short: "Show version information",
+		Use:           "version",
+		Aliases:       []string{"ver"},
+		Short:         "show version info",
+		Long:          "Show version information",
+		SilenceErrors: true,
+		SilenceUsage:  true,
 		Run: func(cmd *cobra.Command, args []string) {
 			if info, ok := debug.ReadBuildInfo(); ok {
 				parts := strings.Split(info.Main.Path, "/")
