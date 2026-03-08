@@ -36,8 +36,8 @@ help: ## prints this message
 
 .PHONY: build
 build: ## builds our binaries
-	ls -1 ./cmd | xargs -I{} \
-		go build -ldflags="-s -w" -o "./bin/{}" "./cmd/{}"
+	find ./cmd -mindepth 1 -maxdepth 1 -type d -print0 | \
+		xargs -0 -I{} sh -c 'go build -ldflags="-s -w" -o bin/$$(basename {}) {}'
 
 .PHONY: test
 test: ## run tests
