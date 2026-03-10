@@ -15,6 +15,8 @@ type Config struct {
 
 	// Archive directory
 	//
+	// Defaults to `/var/log/camserver/`
+	//
 	// Relative paths will be resolved relative to the
 	// location of the loaded configuration file
 	//
@@ -34,7 +36,7 @@ type Config struct {
 	// Will use `192.168.1.200:554/Streaming/channels/101` to generate the hash, thus
 	// making the final recording directory of `camera1`:
 	// `/var/log/camserver/1817dadbf43776ff67f82ba8205bc3bf4e34a5ea03ff65689ab92ea6618bf9e2/`
-	ArchiveDirectory string `yaml:"archive_dir"`
+	ArchiveDirectory string `yaml:"archive_dir,omitempty"`
 }
 
 type CameraCfg struct {
