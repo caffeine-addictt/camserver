@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/caffeine-addictt/camserver/cmd"
 	"github.com/caffeine-addictt/camserver/internal/util"
 	"github.com/lattesec/log"
@@ -32,10 +30,8 @@ var rootCmd = &cobra.Command{
 			verbosityToSet = log.WARN
 		case 1:
 			verbosityToSet = log.INFO
-		case 2:
-			verbosityToSet = log.DEBUG
 		default:
-			return fmt.Errorf("invalid verbosity level %d (-v|-vv)", verbosity)
+			verbosityToSet = log.DEBUG
 		}
 		if quiet {
 			verbosityToSet = log.QUIET
