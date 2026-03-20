@@ -47,12 +47,10 @@ type CameraCfg struct {
 	Rtsp Rtsp `yaml:"rtsp"`
 }
 
-type Rtsp struct{ url.URL }
+type Rtsp struct{ *url.URL }
 
-func (r *Rtsp) UnmarshalBinary(data []byte) error {
-	raw := string(data)
-
-	u, err := url.Parse(raw)
+func (r *Rtsp) UnmarshalYAML(data []byte) error {
+	u, err := url.Parse(string(data))
 	if err != nil {
 		return err
 	}
@@ -69,6 +67,6 @@ func (r *Rtsp) UnmarshalBinary(data []byte) error {
 		u.Host = net.JoinHostPort(u.Hostname(), "554")
 	}
 
-	r.URL = *u
+	*r = Rtsp{URL: u}
 	return nil
 }
