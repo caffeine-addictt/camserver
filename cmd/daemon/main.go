@@ -37,10 +37,7 @@ var rootCmd = &cobra.Command{
 			verbosityToSet = log.QUIET
 		}
 
-		if err := log.DefaultLogger().SetLevel(verbosityToSet); err != nil {
-			return err
-		}
-		return log.Debug().Msg("Debug logging enabled").SendE()
+		return log.DefaultLogger().SetLevel(verbosityToSet)
 	},
 }
 
