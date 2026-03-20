@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/caffeine-addictt/camserver/cmd"
 	"github.com/caffeine-addictt/camserver/internal/util"
 	"github.com/lattesec/log"
@@ -23,6 +25,27 @@ var rootCmd = &cobra.Command{
 		"",
 		"Handles everything in the backend.",
 	),
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		var verbosityToSet log.Level
+		switch verbosity {
+		case 0:
+			verbosityToSet = log.WARN
+		case 1:
+			verbosityToSet = log.INFO
+		case 2:
+			verbosityToSet = log.DEBUG
+		default:
+			return fmt.Errorf("invalid verbosity level %d (-v|-vv)", verbosity)
+		}
+		if quiet {
+			verbosityToSet = log.QUIET
+		}
+
+		if err := log.DefaultLogger().SetLevel(verbosityToSet); err != nil {
+			return err
+		}
+		return log.Debug().Msg("Debug logging enabled").SendE()
+	},
 }
 
 func init() {
