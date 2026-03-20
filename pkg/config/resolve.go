@@ -49,7 +49,7 @@ func LoadConfig(customPath *string) (*Config, error) {
 	if err != nil {
 		log.Error().WithMeta("scope", "cfg").Msgf("failed to get user home dir: %v", err).Send()
 	} else {
-		searchLocations = append(searchLocations, filepath.Join(homeDir, DefaultFileName))
+		searchLocations = append(searchLocations, filepath.Join(homeDir, "."+DefaultFileName))
 	}
 
 	configDir, err := os.UserConfigDir()
