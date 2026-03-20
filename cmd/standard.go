@@ -1,3 +1,6 @@
+// Package cmd
+//
+// Main entry point for camserver binaries
 package cmd
 
 import (
