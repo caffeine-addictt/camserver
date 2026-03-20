@@ -68,5 +68,6 @@ func LoadConfig(customPath *string) (*Config, error) {
 		log.Debug().WithMeta("scope", "cfg").Msgf("failed to load '%s': %v", location, err).Send()
 	}
 
-	return &Config{}, nil
+	log.Debug().WithMeta("scope", "cfg").Msg("no config found").Send()
+	return nil, "", os.ErrNotExist
 }
