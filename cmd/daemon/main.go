@@ -40,7 +40,10 @@ func main() {
 }
 
 func run(c *cobra.Command, args []string) error {
-	cfg := config.NewConfigManager("")
+	cfg, err := config.NewConfigManager("")
+	if err != nil {
+		return err
+	}
 	defer cfg.Close()
 
 	select {

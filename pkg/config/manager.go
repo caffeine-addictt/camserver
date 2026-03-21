@@ -20,7 +20,7 @@ type ConfigManager struct {
 	customPath atomic.Value
 }
 
-func NewConfigManager(customPath string) *ConfigManager {
+func NewConfigManager(customPath string) (*ConfigManager, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	var wg sync.WaitGroup
 
@@ -31,8 +31,12 @@ func NewConfigManager(customPath string) *ConfigManager {
 	}
 	cm.customPath.Store(customPath)
 
+	if err := cm.Load(); err != nil {
+		return nil, err
+	}
+
 	wg.Go(cm.watchConfig)
-	return cm
+	return cm, nil
 }
 
 func (cm *ConfigManager) GetConfig() *Config {
