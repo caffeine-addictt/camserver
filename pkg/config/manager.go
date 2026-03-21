@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"os/signal"
+	"sync"
 	"sync/atomic"
 	"syscall"
 
@@ -12,6 +13,7 @@ import (
 
 type ConfigManager struct {
 	ctx    context.Context
+	wg     *sync.WaitGroup
 	cancel context.CancelFunc
 
 	cfg        atomic.Pointer[Config]
@@ -20,14 +22,16 @@ type ConfigManager struct {
 
 func NewConfigManager(customPath string) *ConfigManager {
 	ctx, cancel := context.WithCancel(context.Background())
+	var wg sync.WaitGroup
 
 	cm := &ConfigManager{
 		ctx:    ctx,
+		wg:     &wg,
 		cancel: cancel,
 	}
 	cm.customPath.Store(customPath)
 
-	go cm.watchConfig()
+	wg.Go(cm.watchConfig)
 	return cm
 }
 
@@ -41,6 +45,7 @@ func (cm *ConfigManager) SetCustomPath(path *string) {
 
 func (cm *ConfigManager) Close() {
 	cm.cancel()
+	cm.wg.Wait()
 }
 
 func (cm *ConfigManager) Load() error {
@@ -60,6 +65,7 @@ func (cm *ConfigManager) watchConfig() {
 	for {
 		select {
 		case <-cm.ctx.Done():
+			log.Info().WithMeta("scope", "cfg").Msg("shutting down config watcher").Send()
 			return
 		case <-sigCh:
 			if err := cm.Load(); err != nil {
