@@ -42,14 +42,14 @@ func loadConfigFile(path string) (*Config, error) {
 //   - $XDG_CONFIG_HOME/camserver/camserver.yaml
 //
 // Returns cfg, path used and any errors
-func LoadConfig(customPath *string) (*Config, string, error) {
-	if customPath != nil {
-		cfg, err := loadConfigFile(*customPath)
+func LoadConfig(customPath string) (*Config, string, error) {
+	if customPath == "" {
+		cfg, err := loadConfigFile(customPath)
 		if err == nil {
-			log.Info().WithMeta("scope", "cfg").Msgf("loaded '%s'", *customPath).Send()
-			return cfg, *customPath, nil
+			log.Info().WithMeta("scope", "cfg").Msgf("loaded '%s'", customPath).Send()
+			return cfg, customPath, nil
 		}
-		log.Error().WithMeta("scope", "cfg").Msgf("failed to load '%s': %v", *customPath, err).Send()
+		log.Error().WithMeta("scope", "cfg").Msgf("failed to load '%s': %v", customPath, err).Send()
 	}
 
 	searchLocations := []string{"."}
