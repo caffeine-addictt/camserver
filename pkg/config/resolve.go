@@ -52,7 +52,14 @@ func LoadConfig(customPath string) (*Config, string, error) {
 		log.Error().WithMeta("scope", "cfg").Msgf("failed to load '%s': %v", customPath, err).Send()
 	}
 
-	searchLocations := []string{"."}
+	searchLocations := []string{}
+
+	pwd, err := os.Getwd()
+	if err != nil {
+		log.Error().WithMeta("scope", "cfg").Msgf("failed to get pwd: %v", err).Send()
+	} else {
+		searchLocations = append(searchLocations, pwd)
+	}
 
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
