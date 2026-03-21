@@ -61,10 +61,10 @@ func (cm *ConfigManager) Load() error {
 	return nil
 }
 
-// Watches SIGHUP
+// Watches SIGUSR1
 func (cm *ConfigManager) watchConfig() {
 	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, syscall.SIGHUP)
+	signal.Notify(sigCh, syscall.SIGUSR1)
 
 	for {
 		select {
@@ -74,6 +74,8 @@ func (cm *ConfigManager) watchConfig() {
 		case <-sigCh:
 			if err := cm.Load(); err != nil {
 				log.Error().WithMeta("scope", "cfg").Msgf("failed to reload config: %v", err).Send()
+			} else {
+				log.Info().WithMeta("scope", "cfg").Msg("SIGUSR1, reloded config").Send()
 			}
 		}
 	}
