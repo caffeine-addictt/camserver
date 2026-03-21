@@ -8,6 +8,8 @@ import (
 
 func main() {
 	defer log.Sync()
+	log.SetInterruptHandler(false)
+	log.DefaultLogger().SetName("camserver-web")
 
 	rootCmd, err := cmd.GetRootCmd()
 	if err != nil {
