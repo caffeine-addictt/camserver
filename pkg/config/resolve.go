@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"io"
 	"os"
 	"path/filepath"
@@ -10,7 +11,7 @@ import (
 )
 
 const (
-	DefaultFileName      = "camserver.yaml"
+	DefaultFileName      = "camserver"
 	DefaultConfigDirName = "camserver"
 )
 
@@ -65,25 +66,42 @@ func LoadConfig(customPath string) (*Config, string, error) {
 	if err != nil {
 		log.Error().WithMeta("scope", "cfg").Msgf("failed to get user home dir: %v", err).Send()
 	} else {
-		searchLocations = append(searchLocations, filepath.Join(homeDir, "."+DefaultFileName))
+		searchLocations = append(searchLocations, homeDir)
 	}
 
 	configDir, err := os.UserConfigDir()
 	if err != nil {
 		log.Error().WithMeta("scope", "cfg").Msgf("failed to get user config dir: %v", err).Send()
 	} else {
-		searchLocations = append(searchLocations, filepath.Join(configDir, DefaultConfigDirName, DefaultFileName))
+		searchLocations = append(searchLocations, filepath.Join(configDir, DefaultConfigDirName))
 	}
 
-	for _, location := range searchLocations {
-		cfg, err := loadConfigFile(location)
-		if err == nil {
-			log.Info().WithMeta("scope", "cfg").Msgf("loaded '%s'", location).Send()
-			return cfg, location, nil
+	for _, dir := range searchLocations {
+		log.Debug().WithMeta("scope", "cfg").Msgf("trying '%s'", dir).Send()
+		errs := make(map[string]error, 0)
+
+		for _, possibleFilename := range []string{
+			"." + DefaultFileName + ".yml",
+			"." + DefaultFileName + ".yaml",
+			DefaultFileName + ".yml",
+			DefaultFileName + ".yaml",
+		} {
+			location := filepath.Join(dir, possibleFilename)
+
+			cfg, err := loadConfigFile(location)
+			if err == nil {
+				log.Info().WithMeta("scope", "cfg").Msgf("loaded '%s'", location).Send()
+				return cfg, location, nil
+			}
+			if !errors.Is(err, os.ErrNotExist) {
+				errs[location] = err
+			}
 		}
-		log.Debug().WithMeta("scope", "cfg").Msgf("failed to load '%s': %v", location, err).Send()
+
+		if len(errs) > 0 {
+			log.Warn().WithMeta("scope", "cfg").Msgf("failed to load: %v", errs).Send()
+		}
 	}
 
-	log.Debug().WithMeta("scope", "cfg").Msg("no config found").Send()
-	return nil, "", os.ErrNotExist
+	return nil, "", errors.New("could not load")
 }
