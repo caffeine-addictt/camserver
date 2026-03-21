@@ -2,12 +2,19 @@ package main
 
 import (
 	"github.com/caffeine-addictt/camserver/cmd"
+	"github.com/caffeine-addictt/camserver/internal/cleanup"
 	"github.com/caffeine-addictt/camserver/internal/util"
 	"github.com/lattesec/log"
 )
 
 func main() {
-	defer log.Sync()
+	ctx, done, wg := cleanup.Watch()
+	defer func() {
+		done()
+		wg.Wait()
+		log.Sync()
+	}()
+
 	log.SetInterruptHandler(false)
 	log.DefaultLogger().SetName("camserver-daemon")
 
