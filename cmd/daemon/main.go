@@ -1,10 +1,14 @@
 package main
 
 import (
+	"time"
+
 	"github.com/caffeine-addictt/camserver/cmd"
 	"github.com/caffeine-addictt/camserver/internal/cleanup"
 	"github.com/caffeine-addictt/camserver/internal/util"
+	"github.com/caffeine-addictt/camserver/pkg/config"
 	"github.com/lattesec/log"
+	"github.com/spf13/cobra"
 )
 
 func main() {
@@ -30,8 +34,18 @@ func main() {
 		"",
 		"Handles everything in the backend.",
 	)
+	rootCmd.RunE = run
 
-	if err := rootCmd.Execute(); err != nil {
-		log.Fatal().Msg(err.Error()).Send()
+	cmd.HandleCmdExec(ctx, rootCmd)
+}
+
+func run(c *cobra.Command, args []string) error {
+	cfg := config.NewConfigManager("")
+	defer cfg.Close()
+
+	select {
+	case <-c.Context().Done():
+	case <-time.After(time.Second * 30):
 	}
+	return nil
 }
