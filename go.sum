@@ -7,6 +7,8 @@ github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2
 github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
 github.com/lattesec/log v0.2.6 h1:aNAKw7L3avnIhdTDVrajFD1NiP6RYR+Q/mPZ2kG3XsE=
 github.com/lattesec/log v0.2.6/go.mod h1:RcV/5ZslbolOHoTIgqqW+JOIxnFTm5zqFZWfylG2k8Q=
+github.com/lattesec/log v0.2.7 h1:+iLqwTPYjiBDWTgLc+eSEAumQQmZpmT3baEkdMGOVNg=
+github.com/lattesec/log v0.2.7/go.mod h1:IOK6FgYpPMEvnWuYWFke3WGgTC3wavjkeYJegcGfBSc=
 github.com/muesli/mango v0.2.0 h1:iNNc0c5VLQ6fsMgAqGQofByNUBH2Q2nEbD6TaI+5yyQ=
 github.com/muesli/mango v0.2.0/go.mod h1:5XFpbC8jY5UUv89YQciiXNlbi+iJgt29VDC5xbzrLL4=
 github.com/muesli/mango-cobra v1.3.0 h1:vQy5GvPg3ndOSpduxutqFoINhWk3vD5K2dXo5E8pqec=
