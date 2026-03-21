@@ -43,7 +43,7 @@ func loadConfigFile(path string) (*Config, error) {
 //
 // Returns cfg, path used and any errors
 func LoadConfig(customPath string) (*Config, string, error) {
-	if customPath == "" {
+	if customPath != "" {
 		cfg, err := loadConfigFile(customPath)
 		if err == nil {
 			log.Info().WithMeta("scope", "cfg").Msgf("loaded '%s'", customPath).Send()
