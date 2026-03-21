@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"time"
 
 	"github.com/caffeine-addictt/camserver/cmd"
@@ -12,7 +14,8 @@ import (
 )
 
 func main() {
-	ctx, done, wg := cleanup.Watch()
+	ctx, done := context.WithCancel(context.Background())
+	wg := cleanup.Watch(ctx, done)
 	defer func() {
 		done()
 		wg.Wait()
@@ -46,9 +49,12 @@ func run(c *cobra.Command, args []string) error {
 	}
 	defer cfg.Close()
 
-	select {
-	case <-c.Context().Done():
-	case <-time.After(time.Second * 30):
+	for {
+		select {
+		case <-c.Context().Done():
+			return nil
+		case <-time.After(time.Second * 1):
+			fmt.Printf("%v\n", cfg.GetConfig())
+		}
 	}
-	return nil
 }

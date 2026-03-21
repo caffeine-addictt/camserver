@@ -78,21 +78,25 @@ func CleanupError() {
 	errorCleanupStack = []func() error{}
 }
 
-func Watch() (context.Context, context.CancelFunc, *sync.WaitGroup) {
-	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
-	wg := WatchContext(ctx)
-	return ctx, stop, wg
+func Watch(rootCtx context.Context, rootDone context.CancelFunc) *sync.WaitGroup {
+	ctx, _ := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	wg := WatchContext(rootCtx, rootDone, ctx)
+	return wg
 }
 
-func WatchContext(ctx context.Context) *sync.WaitGroup {
+func WatchContext(rootCtx context.Context, rootDone context.CancelFunc, sigCtx context.Context) *sync.WaitGroup {
 	var wg sync.WaitGroup
 	wg.Go(func() {
-		<-ctx.Done()
-		log.Debug().Msg("cleaning up...").Send()
+		select {
+		case <-rootCtx.Done():
+		case <-sigCtx.Done():
+			log.Debug().Msg("cleaning up...").Send()
 
-		Cleanup()
-		CleanupError()
-		log.Sync()
+			rootDone()
+			Cleanup()
+			CleanupError()
+			log.Sync()
+		}
 	})
 
 	return &wg
