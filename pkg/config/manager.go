@@ -11,23 +11,30 @@ import (
 	"github.com/lattesec/log"
 )
 
-type ConfigManager struct {
-	ctx    context.Context
-	wg     *sync.WaitGroup
-	cancel context.CancelFunc
+type (
+	ConfigManagerCallback func(newCfg, oldCfg *Config)
 
-	cfg        atomic.Pointer[Config]
-	customPath atomic.Value
-}
+	ConfigManager struct {
+		ctx    context.Context
+		wg     *sync.WaitGroup
+		cancel context.CancelFunc
+
+		cfg        atomic.Pointer[Config]
+		customPath atomic.Value
+
+		callbacks []ConfigManagerCallback
+	}
+)
 
 func NewConfigManager(customPath string) (*ConfigManager, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	var wg sync.WaitGroup
 
 	cm := &ConfigManager{
-		ctx:    ctx,
-		wg:     &wg,
-		cancel: cancel,
+		ctx:       ctx,
+		wg:        &wg,
+		cancel:    cancel,
+		callbacks: []ConfigManagerCallback{},
 	}
 	cm.customPath.Store(customPath)
 
@@ -52,8 +59,21 @@ func (cm *ConfigManager) Close() {
 	cm.wg.Wait()
 }
 
-func (cm *ConfigManager) Load() error {
+// RegisterCallback adds a new func that will be called when config changes
+func (cm *ConfigManager) RegisterCallback(cb ConfigManagerCallback) {
+	cm.callbacks = append(cm.callbacks, cb)
+}
+
+func (cm *ConfigManager) load() (*Config, error) {
 	cfg, _, err := LoadConfig(cm.customPath.Load().(string))
+	if err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
+func (cm *ConfigManager) Load() error {
+	cfg, err := cm.load()
 	if err != nil {
 		return err
 	}
@@ -72,10 +92,16 @@ func (cm *ConfigManager) watchConfig() {
 			log.Info().WithMeta("scope", "cfg").Msg("shutting down config watcher").Send()
 			return
 		case <-sigCh:
-			if err := cm.Load(); err != nil {
+			cfg, err := cm.load()
+			if err != nil {
 				log.Error().WithMeta("scope", "cfg").Msgf("failed to reload config: %v", err).Send()
-			} else {
-				log.Info().WithMeta("scope", "cfg").Msg("SIGUSR1, reloded config").Send()
+				continue
+			}
+
+			log.Info().WithMeta("scope", "cfg").Msg("SIGUSR1, reloded config").Send()
+			old := cm.cfg.Swap(cfg)
+			for _, cb := range cm.callbacks {
+				cb(old, cfg)
 			}
 		}
 	}
