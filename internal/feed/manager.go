@@ -46,3 +46,20 @@ func (fm *FeedManager) Stop() {
 	fm.ctxDone()
 	fm.wg.Wait()
 }
+
+func (fm *FeedManager) UpdateCameras(cameras ...*config.CameraCfg) {
+	// TODO: diff, lock, send stop, restart cameras
+}
+
+func (fm *FeedManager) UpdateArchiveDir(archiveDir string) {
+	fm.archiveDir.Store(archiveDir)
+}
+
+func (fm *FeedManager) ArchiveDir() string {
+	return fm.archiveDir.Load().(string)
+}
+
+// Run is blocking, use a goroutine
+func (fm *FeedManager) Run() {
+	// TODO: run cameras, archive dir
+}
