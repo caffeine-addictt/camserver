@@ -1,0 +1,11 @@
+services:
+  daemon:
+    build: .
+    image: ghcr.io/caffeine-addictt/camserver:latest
+    user: "${UID}:${GID}"
+    restart: unless-stopped
+    volumes:
+      - ./camserver.yml:/camserver.yml
+      - ./data:/data
+    environment:
+      - TZ=Asia/Singapore
