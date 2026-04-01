@@ -65,22 +65,24 @@ func (w *Watcher) Start() {
 				w.L().Info().Msg("shutting down").Send()
 				return
 			default:
-				w.runFFmpegSession()
+				if err := w.runFFmpegSession(); err != nil {
+					w.L().Error().Msg(err.Error()).Send()
+					time.Sleep(5 * time.Second)
+				}
 			}
 		}
 	})
 }
 
 // runFFmpegSession runs ffmpeg for a single MP4 segment and handles rotation
-func (w *Watcher) runFFmpegSession() {
+func (w *Watcher) runFFmpegSession() error {
 	timestamp := time.Now().Format("20060102-150405")
 	rootDir := filepath.Join(w.ArchiveDir, w.Camera.GetDirRel())
 	tmpPath := filepath.Join(rootDir, fmt.Sprintf("%s.tmp.mp4", timestamp))
 	finalPath := filepath.Join(rootDir, fmt.Sprintf("%s.mp4", timestamp))
 
 	if err := os.MkdirAll(rootDir, 0o755); err != nil {
-		w.L().Error().Msgf("failed to create archive dir at %s: %v", w.ArchiveDir, err).Send()
-		return
+		return fmt.Errorf("failed to create archive dir at %s: %v", w.ArchiveDir, err)
 	}
 	w.L().Debug().Msgf("writing to temp %s", tmpPath).Send()
 
@@ -100,16 +102,16 @@ func (w *Watcher) runFFmpegSession() {
 	w.L().Info().Msg("starting ffmpeg").Send()
 
 	if err := cmd.Run(); err != nil {
-		w.L().Error().Msgf("ffmpeg exited with error: %v", err).Send()
-		return
+		return fmt.Errorf("ffmpeg exited with error: %v", err)
 	}
 
 	if err := os.Rename(tmpPath, finalPath); err != nil {
-		w.L().Error().Msgf("failed to promote tmp at %s → %s: %v", tmpPath, finalPath, err).Send()
-		return
+		return fmt.Errorf("failed to promote tmp at %s → %s: %v", tmpPath, finalPath, err)
 	}
 
 	w.L().Debug().Msgf("saved segment: %s", finalPath).Send()
 
 	// TODO: cleanup older files
+
+	return nil
 }
