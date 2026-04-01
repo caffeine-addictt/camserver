@@ -47,12 +47,12 @@ func main() {
 }
 
 func run(wg *sync.WaitGroup, cfgManager *config.ConfigManager, c *cobra.Command, _ []string) error {
-	cfgManager.RegisterCallback(func(newCfg, oldCfg *config.Config) {
-		fmt.Printf("NEW\n%+v\nOLD\n%+v\n", newCfg, oldCfg)
-	})
-
-	fm := feed.NewFeedManager(c.Context(), wg)
+	fm := feed.NewFeedManager(c.Context(), wg, cfgManager.GetConfig().ArchiveDirectory, cfgManager.GetConfig().Cameras...)
 	defer fm.Stop()
+
+	cfgManager.RegisterCallback(func(newCfg, oldCfg *config.Config) {
+		fm.UpdateCameras(newCfg.Cameras...)
+	})
 
 	for {
 		select {
