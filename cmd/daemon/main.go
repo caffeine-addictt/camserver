@@ -3,10 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/caffeine-addictt/camserver/cmd"
 	"github.com/caffeine-addictt/camserver/internal/cleanup"
+	"github.com/caffeine-addictt/camserver/internal/feed"
 	"github.com/caffeine-addictt/camserver/internal/util"
 	"github.com/caffeine-addictt/camserver/pkg/config"
 	"github.com/lattesec/log"
@@ -25,36 +27,44 @@ func main() {
 	log.SetInterruptHandler(false)
 	log.DefaultLogger().SetName("camserver-daemon")
 
-	rootCmd, err := cmd.GetRootCmd()
+	root, err := cmd.GetRootCmd()
 	if err != nil {
 		log.Fatal().Msg(err.Error()).Send()
 	}
 
-	rootCmd.Use = "camserver-daemon"
-	rootCmd.Short = "camserver daemon"
-	rootCmd.Long = util.MultilineString(
+	root.Cmd.Use = "camserver-daemon"
+	root.Cmd.Short = "camserver daemon"
+	root.Cmd.Long = util.MultilineString(
 		"Camera Server daemon",
 		"",
 		"Handles everything in the backend.",
 	)
-	rootCmd.RunE = run
+	root.Cmd.RunE = func(cmd *cobra.Command, args []string) error {
+		return run(wg, root.CfgManager, cmd, args)
+	}
 
-	cmd.HandleCmdExec(ctx, rootCmd)
+	cmd.HandleCmdExec(ctx, root.Cmd)
 }
 
-func run(c *cobra.Command, args []string) error {
-	cfg, err := config.NewConfigManager("")
-	if err != nil {
-		return err
-	}
-	defer cfg.Close()
+func run(wg *sync.WaitGroup, cfgManager *config.ConfigManager, c *cobra.Command, _ []string) error {
+	// cfg, err := config.NewConfigManager("")
+	// if err != nil {
+	// 	return err
+	// }
+	// defer cfg.Close()
+	cfgManager.RegisterCallback(func(newCfg, oldCfg *config.Config) {
+		fmt.Printf("NEW\n%+v\nOLD\n%+v\n", newCfg, oldCfg)
+	})
+
+	_ = feed.NewFeedManager(c.Context(), wg)
+	// defer fm.Stop()
 
 	for {
 		select {
 		case <-c.Context().Done():
 			return nil
 		case <-time.After(time.Second * 1):
-			fmt.Printf("%v\n", cfg.GetConfig())
+			fmt.Printf("%+v\n", cfgManager)
 		}
 	}
 }

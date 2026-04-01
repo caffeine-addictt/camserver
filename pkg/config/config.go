@@ -13,9 +13,7 @@ type Config struct {
 	// Cameras to look at
 	Cameras []CameraCfg `yaml:"cameras"`
 
-	// Archive directory
-	//
-	// Defaults to `/var/log/camserver/`
+	// Archive directory Defaults to `/var/log/camserver/`
 	//
 	// Relative paths will be resolved relative to the
 	// location of the loaded configuration file

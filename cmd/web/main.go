@@ -21,18 +21,18 @@ func main() {
 	log.SetInterruptHandler(false)
 	log.DefaultLogger().SetName("camserver-web")
 
-	rootCmd, err := cmd.GetRootCmd()
+	root, err := cmd.GetRootCmd()
 	if err != nil {
 		log.Fatal().Msg(err.Error()).Send()
 	}
 
-	rootCmd.Use = "camserver"
-	rootCmd.Short = "camserver web"
-	rootCmd.Long = util.MultilineString(
+	root.Cmd.Use = "camserver"
+	root.Cmd.Short = "camserver web"
+	root.Cmd.Long = util.MultilineString(
 		"Camera Server Web Interface",
 		"",
 		"Access bridge to camserver-daemon",
 	)
 
-	cmd.HandleCmdExec(ctx, rootCmd)
+	cmd.HandleCmdExec(ctx, root.Cmd)
 }
