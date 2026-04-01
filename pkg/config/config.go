@@ -4,6 +4,8 @@
 package config
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"net"
 	"net/url"
@@ -45,6 +47,12 @@ type CameraCfg struct {
 
 	// Camera feed access
 	Rtsp Rtsp `yaml:"rtsp"`
+}
+
+func (cc *CameraCfg) GetDirRel() string {
+	plain := fmt.Sprintf("%s%s", cc.Rtsp.Host, cc.Rtsp.Path)
+	data := sha256.Sum256([]byte(plain))
+	return hex.EncodeToString(data[:])
 }
 
 type Rtsp struct{ *url.URL }
