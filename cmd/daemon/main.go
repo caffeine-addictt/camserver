@@ -47,11 +47,6 @@ func main() {
 }
 
 func run(wg *sync.WaitGroup, cfgManager *config.ConfigManager, c *cobra.Command, _ []string) error {
-	// cfg, err := config.NewConfigManager("")
-	// if err != nil {
-	// 	return err
-	// }
-	// defer cfg.Close()
 	cfgManager.RegisterCallback(func(newCfg, oldCfg *config.Config) {
 		fmt.Printf("NEW\n%+v\nOLD\n%+v\n", newCfg, oldCfg)
 	})
