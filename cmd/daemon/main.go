@@ -2,9 +2,7 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"sync"
-	"time"
 
 	"github.com/caffeine-addictt/camserver/cmd"
 	"github.com/caffeine-addictt/camserver/internal/cleanup"
@@ -54,12 +52,7 @@ func run(wg *sync.WaitGroup, cfgManager *config.ConfigManager, c *cobra.Command,
 		fm.UpdateCameras(newCfg.Cameras...)
 	})
 
-	for {
-		select {
-		case <-c.Context().Done():
-			return nil
-		case <-time.After(time.Second * 1):
-			fmt.Printf("%+v\n", cfgManager)
-		}
-	}
+	log.Info().Msg("starting daemon").Send()
+	<-c.Context().Done()
+	return nil
 }
