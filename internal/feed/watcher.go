@@ -74,14 +74,14 @@ func (w *Watcher) Start() {
 // runFFmpegSession runs ffmpeg for a single MP4 segment and handles rotation
 func (w *Watcher) runFFmpegSession() {
 	timestamp := time.Now().Format("20060102-150405")
-	tmpPath := filepath.Join(w.ArchiveDir, fmt.Sprintf("%s-%s.tmp.mp4", w.Camera.Name, timestamp))
-	finalPath := filepath.Join(w.ArchiveDir, fmt.Sprintf("%s-%s.mp4", w.Camera.Name, timestamp))
+	rootDir := filepath.Join(w.ArchiveDir, w.Camera.GetDirRel())
+	tmpPath := filepath.Join(rootDir, fmt.Sprintf("%s.tmp.mp4", timestamp))
+	finalPath := filepath.Join(rootDir, fmt.Sprintf("%s.mp4", timestamp))
 
-	if err := os.MkdirAll(w.ArchiveDir, 0o755); err != nil {
+	if err := os.MkdirAll(rootDir, 0o755); err != nil {
 		w.L().Error().Msgf("failed to create archive dir at %s: %v", w.ArchiveDir, err).Send()
 		return
 	}
-
 	w.L().Debug().Msgf("writing to temp %s", tmpPath).Send()
 
 	args := []string{
