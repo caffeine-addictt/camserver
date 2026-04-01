@@ -10,9 +10,6 @@ import (
 )
 
 type Config struct {
-	// Cameras to look at
-	Cameras []CameraCfg `yaml:"cameras"`
-
 	// Archive directory Defaults to `/var/log/camserver/`
 	//
 	// Relative paths will be resolved relative to the
@@ -35,6 +32,11 @@ type Config struct {
 	// making the final recording directory of `camera1`:
 	// `/var/log/camserver/1817dadbf43776ff67f82ba8205bc3bf4e34a5ea03ff65689ab92ea6618bf9e2/`
 	ArchiveDirectory string `yaml:"archive_dir,omitempty"`
+
+	// Cameras to look at
+	Cameras []CameraCfg `yaml:"cameras"`
+
+	Server ServerCfg `yaml:"server,omitempty"`
 }
 
 type CameraCfg struct {
@@ -67,4 +69,16 @@ func (r *Rtsp) UnmarshalYAML(data []byte) error {
 
 	*r = Rtsp{URL: u}
 	return nil
+}
+
+type ServerCfg struct {
+	/// Prefer calling [ServerCfg.GetPort]
+	Port *uint16 `yaml:"port,omitempty"`
+}
+
+func (sc *ServerCfg) GetPort() uint16 {
+	if sc.Port == nil {
+		return 3000
+	}
+	return *sc.Port
 }
