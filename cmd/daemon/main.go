@@ -51,8 +51,8 @@ func run(wg *sync.WaitGroup, cfgManager *config.ConfigManager, c *cobra.Command,
 		fmt.Printf("NEW\n%+v\nOLD\n%+v\n", newCfg, oldCfg)
 	})
 
-	_ = feed.NewFeedManager(c.Context(), wg)
-	// defer fm.Stop()
+	fm := feed.NewFeedManager(c.Context(), wg)
+	defer fm.Stop()
 
 	for {
 		select {

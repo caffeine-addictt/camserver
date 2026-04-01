@@ -17,18 +17,19 @@ type FeedManager struct {
 	ctx     *context.Context
 	ctxDone context.CancelFunc
 
-	cameras    config.CameraCfg
+	cameras    []*config.CameraCfg
 	archiveDir atomic.Value
 }
 
 // NewFeedManager follows the RAII model
-func NewFeedManager(ctx context.Context, rootWg *sync.WaitGroup) *FeedManager {
+func NewFeedManager(ctx context.Context, rootWg *sync.WaitGroup, cameras ...*config.CameraCfg) *FeedManager {
 	fmCtx, fmCtxDone := context.WithCancel(context.Background())
 
 	fm := &FeedManager{
 		wg:      &sync.WaitGroup{},
 		ctx:     &fmCtx,
 		ctxDone: fmCtxDone,
+		cameras: cameras,
 	}
 
 	rootWg.Go(func() {
