@@ -1,7 +1,7 @@
 services:
   daemon:
     build: .
-    image: ghcr.io/caffeine-addictt/camserver:latest
+    image: ghcr.io/caffeine-addictt/camserver-daemon:latest
     user: "${UID}:${GID}"
     restart: unless-stopped
     volumes:
